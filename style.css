@@ -20,6 +20,10 @@ body {
   background-color: #1F1F1F;
 }
 
+button {
+  cursor: pointer;
+}
+
 #app {
   height: 100%;
 
@@ -141,10 +145,22 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  
+  cursor: grab;
+}
+
+.dragged{
+  cursor: grabbing;
 }
 
 .inventory-item-img {
   object-fit: fill;
+}
+
+.suggested-item {
+    opacity: 0;
+    
+    transition: opacity .4s ease-out;
 }
 
 .suggested-item-img-wrapper {

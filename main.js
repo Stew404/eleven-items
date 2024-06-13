@@ -44,8 +44,42 @@ function createItemNode(item) {
   return itemNode
 }
 
-function renderSuggestedItems(){
-  const ids = getRandomIds(5)
+function getUndoFunctions(){
+  let ids = []
+  let lastAddedItemId = null
+
+  const setPrevState = (newIds, newLastAddedItemId)=>{
+    ids = newIds
+    lastAddedItemId = newLastAddedItemId
+  }
+
+  const returnToPrevState = ()=>{
+
+    if(!ids.length){
+      return
+    }
+
+    renderSuggestedItems(ids);
+    const lastAddedItemElem = document.querySelector(`.inventory-item-wrapper[data-item-id="${lastAddedItemId}"]`)
+    console.log(lastAddedItemElem)
+    lastAddedItemElem.remove()
+    updateCommandsList(lastAddedItemId, "delete")
+
+    ids = []
+  }
+  
+  return [setPrevState, returnToPrevState]
+}
+
+const [setPrevState, returnToPrevState] = getUndoFunctions();
+
+const undoButton = document.querySelector(".commands-back")
+
+undoButton.addEventListener("click", ()=>{
+  returnToPrevState()
+})
+
+function renderSuggestedItems(ids = getRandomIds(5)){
   const itemsDispenserElem = document.querySelector(".items-dispenser .dispenser-main");
 
   itemsDispenserElem.innerHTML = ""
@@ -58,11 +92,16 @@ function renderSuggestedItems(){
     itemNode
     .querySelector(`button`)
     .addEventListener("click", (e)=>{
-      addItemToInventory(e.target.dataset.itemId);
+      const curItemId = e.target.dataset.itemId
+      addItemToInventory(curItemId);
+      setPrevState(ids, curItemId);
       renderSuggestedItems();
     })
   
     itemsDispenserElem.appendChild(itemNode)
+    setTimeout(() => {
+      itemNode.style.opacity = "1";
+    }, 1);
   }
   
 }
@@ -74,9 +113,7 @@ function getCommandsListUpdater(){
   const commandsMap = new Map();
 
 
-  return (itemId, action = "update")=>{
-
-
+  return (itemId, action)=>{
     if(action === "delete"){
       console.log(action)
       commandsMap.delete(itemId);
@@ -86,11 +123,6 @@ function getCommandsListUpdater(){
       commandsMap.set(itemId, `giveitem c${itemId}`);
     }
 
-    // if(commandsMap.has(itemId)){
-    //   commandsMap.delete(itemId);
-    // } else {
-    //   commandsMap.set(itemId, `giveitem c${itemId}`)
-    // }
     const commandsContent = commandsMap.values().reduce((acc, cur) => acc += `${cur}<br>`, "")
     commandsListElem.innerHTML = commandsContent
 
@@ -114,10 +146,7 @@ function addItemToInventory(itemId){
   
   updateCommandsList(itemId, "set")
 
-  document.querySelector(`.inventory-item-wrapper[data-item-id="${itemId}"]`).addEventListener("click", ()=>{
-    itemNode.remove()
-    updateCommandsList(itemId, "delete")
-  })
+  
   
 }
 
@@ -171,5 +200,7 @@ stockListElem.addEventListener("dragover", (e)=>{
 
 
 renderSuggestedItems();
+
+
 
 
