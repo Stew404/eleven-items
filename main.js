@@ -2,6 +2,12 @@ import './style.css'
 
 import items from "./items.json"
 
+let passiveItems = items.filter(item => item.type === "passive")
+let activeItems = items.filter(item => item.type === "active")
+
+let usedPassiveIds = []
+let usedActiveIds = []
+
 document.querySelector('#app').innerHTML = `
   <div class="items-dispenser">
     <h2 class="dispenser-header">Выберите предмет</h2>
@@ -19,14 +25,22 @@ document.querySelector('#app').innerHTML = `
   </div>
 `
 
-function getRandomIds(count = 5){
-  const randomIds = []
+function getRandomIds(count = 5, itemsArr = passiveItems){
+  const randomIds = new Set()
 
-  for (let i = 0; i < count; i++) {
-    randomIds.push(Math.floor(Math.random()*items.length))
+  const usedIds = itemsArr[0].type === "active" ? usedActiveIds : usedPassiveIds
+
+  console.log(usedIds)
+
+  while (randomIds.size < count) {
+    const number = Math.floor(Math.random()*itemsArr.length)
+
+    if(!usedIds.includes(number)){
+      randomIds.add(number)
+    }
   }
 
-  return randomIds
+  return [...randomIds]
 }
 
 function createItemNode(item) {
@@ -44,12 +58,21 @@ function createItemNode(item) {
   return itemNode
 }
 
+let currentTurn = 1;
+
 function getUndoFunctions(){
   let ids = []
+  let itemsType = ""
   let lastAddedItemId = null
 
-  const setPrevState = (newIds, newLastAddedItemId)=>{
+  const itemsArrays = {
+    "active": activeItems,
+    "passive": passiveItems
+  }
+
+  const setPrevState = (newIds, newItemsType, newLastAddedItemId)=>{
     ids = newIds
+    itemsType = newItemsType
     lastAddedItemId = newLastAddedItemId
   }
 
@@ -59,9 +82,11 @@ function getUndoFunctions(){
       return
     }
 
-    renderSuggestedItems(ids);
+    currentTurn--;
+
+    renderSuggestedItems(ids, itemsArrays[itemsType]);
+
     const lastAddedItemElem = document.querySelector(`.inventory-item-wrapper[data-item-id="${lastAddedItemId}"]`)
-    console.log(lastAddedItemElem)
     lastAddedItemElem.remove()
     updateCommandsList(lastAddedItemId, "delete")
 
@@ -79,31 +104,51 @@ undoButton.addEventListener("click", ()=>{
   returnToPrevState()
 })
 
-function renderSuggestedItems(ids = getRandomIds(5)){
+
+function renderSuggestedItems(ids = getRandomIds(), curItems = passiveItems){
+
   const itemsDispenserElem = document.querySelector(".items-dispenser .dispenser-main");
 
   itemsDispenserElem.innerHTML = ""
 
   for (let i = 0; i < ids.length; i++) {
-    const item = items[ids[i]];
+    const item = curItems[ids[i]];
 
     const itemNode = createItemNode(item)
 
     itemNode
     .querySelector(`button`)
     .addEventListener("click", (e)=>{
+      
+      const isCurrentTurnEleventh = currentTurn % 11 === 0;
+
+      if(isCurrentTurnEleventh){
+        usedActiveIds = [...usedActiveIds, ...ids]
+      } else {
+        usedPassiveIds = [...usedPassiveIds, ...ids]
+      }
+
+      const curItemsType =  isCurrentTurnEleventh ? "active" : "passive";
       const curItemId = e.target.dataset.itemId
+
       addItemToInventory(curItemId);
-      setPrevState(ids, curItemId);
-      renderSuggestedItems();
+      setPrevState(ids, curItemsType, curItemId);
+
+      if(currentTurn % 11 === 10) {
+        renderSuggestedItems(getRandomIds(5, activeItems), activeItems);
+      } else {
+        renderSuggestedItems();
+      }
+
+      currentTurn++;
     })
   
     itemsDispenserElem.appendChild(itemNode)
+
     setTimeout(() => {
       itemNode.style.opacity = "1";
     }, 1);
   }
-  
 }
 
 
