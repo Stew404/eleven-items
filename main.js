@@ -1,5 +1,8 @@
 import './style.css'
 
+import dragEventsInit from './drag'
+import getCommandsListUpdater from './commands'
+
 import items from "./items.json"
 
 let passiveItems = items.filter(item => item.type === "passive")
@@ -25,12 +28,14 @@ document.querySelector('#app').innerHTML = `
   </div>
 `
 
+dragEventsInit();
+
+const updateCommandsList = getCommandsListUpdater()
+
 function getRandomIds(count = 5, itemsArr = passiveItems){
   const randomIds = new Set()
 
   const usedIds = itemsArr[0].type === "active" ? usedActiveIds : usedPassiveIds
-
-  console.log(usedIds)
 
   while (randomIds.size < count) {
     const number = Math.floor(Math.random()*itemsArr.length)
@@ -153,29 +158,6 @@ function renderSuggestedItems(ids = getRandomIds(), curItems = passiveItems){
 
 
 
-function getCommandsListUpdater(){
-  const commandsListElem = document.querySelector(".commands-list");
-  const commandsMap = new Map();
-
-
-  return (itemId, action)=>{
-    if(action === "delete"){
-      console.log(action)
-      commandsMap.delete(itemId);
-    }
-
-    if(action === "set"){
-      commandsMap.set(itemId, `giveitem c${itemId}`);
-    }
-
-    const commandsContent = commandsMap.values().reduce((acc, cur) => acc += `${cur}<br>`, "")
-    commandsListElem.innerHTML = commandsContent
-
-  }
-}
-
-const updateCommandsList = getCommandsListUpdater()
-
 function addItemToInventory(itemId){
   const inventoryElem = document.querySelector(".inventory-build")
 
@@ -195,53 +177,7 @@ function addItemToInventory(itemId){
   
 }
 
-const buildListElem = document.querySelector(".inventory-build")
-const stockListElem = document.querySelector(".inventory-stock")
 
-buildListElem.addEventListener("dragstart", (e)=>{
-  e.target.classList.add("dragged")
-})
-
-buildListElem.addEventListener("dragend", (e)=>{
-  e.target.classList.remove("dragged")
-})
-
-stockListElem.addEventListener("dragstart", (e)=>{
-  e.target.classList.add("dragged")
-})
-
-stockListElem.addEventListener("dragend", (e)=>{
-  e.target.classList.remove("dragged")
-})
-
-function dragOverHandler (e, draggedElem){
-  e.preventDefault()
-
-  const curElem = e.target
-
-  const isMoveable = draggedElem !== curElem 
-    && (curElem.classList.contains("inventory-build") || curElem.classList.contains("inventory-stock"))
-
-  if(!isMoveable){
-    return
-  }
-
-  curElem.appendChild(draggedElem)
-}
-
-buildListElem.addEventListener("dragover", (e)=>{
-  const draggedElem = document.querySelector(".dragged");
-  dragOverHandler(e, draggedElem)
-
-  updateCommandsList(draggedElem.dataset.itemId, "set")
-})
-
-stockListElem.addEventListener("dragover", (e)=>{
-  const draggedElem = document.querySelector(".dragged");
-  dragOverHandler(e, draggedElem)
-
-  updateCommandsList(draggedElem.dataset.itemId, "delete")
-})
 
 
 renderSuggestedItems();
