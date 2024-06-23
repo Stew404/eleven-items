@@ -1,7 +1,7 @@
 import './style.css'
 
 import dragEventsInit from './drag'
-import getCommandsListUpdater from './commands'
+import updateCommandsList from './updateCommandsList'
 
 import items from "./items.json"
 
@@ -29,8 +29,6 @@ document.querySelector('#app').innerHTML = `
 `
 
 dragEventsInit();
-
-const updateCommandsList = getCommandsListUpdater()
 
 function getRandomIds(count = 5, itemsArr = passiveItems){
   const randomIds = new Set()

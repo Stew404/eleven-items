@@ -1,4 +1,4 @@
-import getCommandsListUpdater from './commands'
+import updateCommandsList from './updateCommandsList'
 
 function dragOverHandler (e, draggedElem){
   e.preventDefault()
@@ -16,8 +16,6 @@ function dragOverHandler (e, draggedElem){
 }
 
 export default function dragEventsInit(){
-
-    const updateCommandsList = getCommandsListUpdater()
 
     const buildListElem = document.querySelector(".inventory-build")
     const stockListElem = document.querySelector(".inventory-stock")
