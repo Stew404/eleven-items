@@ -75,7 +75,7 @@ button {
   padding: 30px 100px;
 }
 
-.bottom-row {
+.mid-row {
   display: flex;
 }
 
@@ -158,9 +158,25 @@ button {
 }
 
 .suggested-item {
-    opacity: 0;
-    
-    transition: opacity .4s ease-out;
+  opacity: 0;
+  
+  transition: opacity .4s ease-out;
+}
+
+.suggested-item:nth-child(1){
+  transition-delay: 0;
+}
+.suggested-item:nth-child(2){
+  transition-delay: .4s;
+}
+.suggested-item:nth-child(3){
+  transition-delay: .8s;
+}
+.suggested-item:nth-child(4){
+  transition-delay: 1.2s;
+}
+.suggested-item:nth-child(5){
+  transition-delay: 1.6s;
 }
 
 .suggested-item-img-wrapper {
@@ -199,5 +215,12 @@ button {
 
   border: none;
   border-radius: 5px;
+}
+
+.roll-counter {
+  max-width: 300px;
+
+  text-align: center;
+  font-size: 36px;
 }
 

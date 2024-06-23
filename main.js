@@ -4,6 +4,7 @@ import dragEventsInit from './drag'
 import updateCommandsList from './updateCommandsList'
 
 import items from "./items.json"
+import { addRollCount, subRollCount } from './rollCounter'
 
 let passiveItems = items.filter(item => item.type === "passive")
 let activeItems = items.filter(item => item.type === "active")
@@ -16,7 +17,7 @@ document.querySelector('#app').innerHTML = `
     <h2 class="dispenser-header">Выберите предмет</h2>
     <div class="dispenser-main"></div>
   </div>
-  <div class="bottom-row">
+  <div class="mid-row">
     <div class="commands">
       <p class="commands-list"></p>
       <button class="commands-back">Назад</button>
@@ -26,8 +27,11 @@ document.querySelector('#app').innerHTML = `
       <div class="inventory-stock"></div>
     </div>
   </div>
+  <p class="roll-counter">
+    Ролл: 
+    <span class="roll-number">1</span>
+  </p>
 `
-
 dragEventsInit();
 
 function getRandomIds(count = 5, itemsArr = passiveItems){
@@ -93,6 +97,8 @@ function getUndoFunctions(){
     lastAddedItemElem.remove()
     updateCommandsList(lastAddedItemId, "delete")
 
+    subRollCount()
+
     ids = []
   }
   
@@ -143,6 +149,8 @@ function renderSuggestedItems(ids = getRandomIds(), curItems = passiveItems){
         renderSuggestedItems();
       }
 
+
+      addRollCount()
       currentTurn++;
     })
   
